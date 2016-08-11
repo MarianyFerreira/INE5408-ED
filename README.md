@@ -37,3 +37,15 @@ This repository contains exercises, tests and work practice of the discipline of
 12. Manages files;
 
 13. Ordination;
+
+
+--------------------------------------------------------------------------------------------------------
+
+#include <iostream>
+
+int main(){
+    
+    std::cout<<"With great power comes great responsibility"<< std::endl;
+    return 0;
+
+}
