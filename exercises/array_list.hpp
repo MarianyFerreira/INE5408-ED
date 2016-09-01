@@ -13,7 +13,7 @@ namespace structures {
 template<typename T>
 class ArrayList {
 public:
-
+//------------------------------------------------------------------------------------------------------------------------------
 /**
  * @brief      Construtor da classe Lista sem parâmetros.
  */
@@ -22,7 +22,7 @@ public:
  * @brief      Construtor da classe Lista com parâmetros.
  * @tparam     max_size     Parâmetro que recebe o tamanho da lista a ser criada
  */
-    ArrayList(std::size_t max_size): ArrayList(new T [max_size_], size_ (-1), max_size_ (max_size)){}
+    ArrayList(std::size_t max_size): ArrayList(new T [max_size_], size_ (0), max_size_ (max_size)){}
 /**
  * @brief      Destrutor da classe Lista sem parâmetros.
  *             Usado para destruir em memoria tudo o que foi construido pela Lista
@@ -30,76 +30,25 @@ public:
     ~ArrayList(){
         delete [] contents;
     }
+//------------------------------------------------------------------------------------------------------------------------------
 /**
- * @brief      Metodo que verifica e retorna se a Lista está vazia.
+ * @brief      Metodo que limpa a lista.
  */
-    bool empty(){
-        return size_ == -1;
-    }
-/**
- * @brief      Metodo que verifica e retorna se a Lista está cheia.
- */
-    bool full(){
-        return size_ == max_size_ -1;
-    }
-/**
- * @brief      Metodo que verifica e retorna se a Lista contem determinado dado.
- * @param[in]  data     Dado a ser consultado na Lista
- */
-    bool contains(const T& data){
-        if (empty())
-            
-            return false;
-
-         return std::find_if(contents, contents + max_size_, data) != contents + max_size_;
-    }
-/**
- * @brief      Metodo que retorna o tamanho da lista.
- */
-    std::size_t size(){
-        return size_ + 1;
-    }
-/**
- * @brief      Metodo que retorna o tamanho máximo da lista.
- */
-    std::size_t max_size(){
-        return max_size_;
-    }
-/**
- * @brief      Metodo que verifica e retorna se a Lista contem determinado dado.
- * @param[in]  data     Dado a ser consultado na Lista
- */
-    T at(std::size_t index){
-
-        if (empty())
-            throw std::out_of_range("Empty ArrayList!");
-
-        if (index < 0 || index > size_ + 1)
-            throw std::out_of_range("Index not found!");
-        
-        return contents[index];
-    }
-/**
- * @brief      Ver o que seria esse método
- * @param[in]  
- */
-    T& operator[](std::size_t index){
-
+    void clear(){
+        size_ = 0;
     }
 /**
  * @brief      Metodo que inclui um dado no final da Lista.
  * @param[in]  data     Dado a ser inserido na Lista
  */
-    void push_back(T data){
-
-        insert(data, size_ + 1);
+    void push_back(const T& data){
+        insert(data, size_);
     }
 /**
  * @brief      Metodo que inclui um dado no inicio da Lista.
  * @param[in]  data     Dado a ser inserido na Lista
  */
-    void push_front(T data){
-
+    void push_front(const T& data){
         insert(data, 0);
     }
 /**
@@ -107,19 +56,18 @@ public:
  * @param[in]  data     Dado a ser consultado na Lista
   * @param[in]  index   Local onde o dado deve ser inserido na Lista
  */
-    void insert(T data, std::size_t index){
+    void insert(const T& data, std::size_t index){
         if (full())
             throw std::out_of_range("Full ArrayList!");
         
-        if (index < 0 || index > size_ + 1)
+        if (index > size_)
             throw std::out_of_range("Index not found!");
         
-        size_ ++;
-        int current = size_;
+        int current = size_++;
 
         while (current > index){
-            contents[current] = contents[current -1];
-            current = current -1;
+            contents[current] = contents[current - 1];
+            --current;
         }
         
         contents[index] = data;
@@ -131,80 +79,152 @@ public:
  *             sejam primitivos.
  * @param[in]  data     Dado a ser consultado na Lista
  */
-    void insert_sorted(T data){
+    void insert_sorted(const T& data){
+        if (full())
+            throw std::out_of_range("Full ArrayList!");
+        
+        while (index <= size + 1 && data > contents[index++]);
 
-        int index = 0;
-
-        while (index <= size_ && data > contents[index]){
-            index ++;
-        }
-
-        return(insert(data, index));
-
+        insert(data, index);
     }
 /**
  * @brief      Metodo que retira um dado na posição desejada da Lista.
  * @param[in]  index    Posição do dado a ser retirado da lista
  */
     T pop(std::size_t index){
-
         if (empty())
             throw std::out_of_range("Empty ArrayList!");
 
-        if (index < 0 || index > size_)
+        if (index >= size_)
             throw std::out_of_range("Index not found!");
-        
-        size_ --;
+    
         int current = index;
         T data = contents[index];
 
-        while(current <= size_){
+        while(current < size_){
 
             contents[current] = contents[current+1];
-            current ++;
+            ++current;
         }
-
+        --size_;
         return data;
-    }
-/**
- * @brief      Metodo que retira o primeiro elemento da Lista.
- */
-    T pop_front(){
-
-        return pop(0);
     }
 /**
  * @brief      Metodo que retira o ultimo elemento da Lista.
  */
     T pop_back(){
-
         return pop(size_);
     }
 /**
- * @brief      Metodo que limpa a lista.
+ * @brief      Metodo que retira o primeiro elemento da Lista.
  */
-    void clear(){
-        size_ = -1;
+    T pop_front(){
+        return pop(0);
     }
 /**
  * @brief      Metodo que retira o dado da Lista.
  * @param[in]  data   Dado a ser retirado da Lista.
  */
-    void remove(T data){
-
+    void remove(const T& data){
         if (empty())
             throw std::out_of_range("Empty ArrayList!");
-        
-        int index = 0;
 
-        while(index <= size_ && contents[index] != data){
-            index ++;
-        }
-
+        std::size_t index = find(data);
         pop(index);
+    }
+/**
+ * @brief      Metodo que verifica e retorna se a Lista está cheia.
+ */
+    bool full(){
+        return size_ == max_size_ -1;
+    }
+/**
+ * @brief      Metodo que verifica e retorna se a Lista está vazia.
+ */
+    bool empty(){
+        return size_ == -1;
+    }
+/**
+ * @brief      Metodo que verifica e retorna se a Lista contem determinado dado.
+ * @param[in]  data     Dado a ser consultado na Lista
+ */
+    bool contains(const T& data){  
+        bool contain = false;
+        
+        if (empty())
+            return contain;
+        
+        for (int i = 0; i <= size_; i ++){
+            if (contents[i] == data)
+                contain = true;
+        }
+    }
+        return contain;
+//         return std::find_if(contents, contents + max_size_, data) != contents + max_size_;
+    }
+
+    std::size_t find(const T& data) const{
+        if(empty())
+            throw std::out_of_range("Empty ArrayList!");
+
+         for(int index = 0; index <= size_; index++){
+            if (contents[index] == data)
+                return index;
+         }
+         throw std::out_of_range("Data not find");
+    }
+/**
+ * @brief      Metodo que retorna o tamanho da lista.
+ */
+    std::size_t size(){
+        return size_;
+    }
+/**
+ * @brief      Metodo que retorna o tamanho máximo da lista.
+ */
+    std::size_t max_size(){
+        return max_size_;
+    }
+
+/**
+ * @brief      Retorna o dado no endereço
+ * @param[in]  index indice do dado na lista
+ */
+    T& at(std::size_t index){
+        
+        return at(index);
+    }
+/**
+ * @brief      Retorna o dado no endereço const
+ * @param[in]  index indice do dado na lista const
+ */
+    const T& at(std::size_t index) const {
+        if (empty())
+            throw std::out_of_range("Empty ArrayList!");
+
+        if (index > size_)
+            throw std::out_of_range("Index not found!");
+        
+        return contents[index];
+    }
+/**
+ * @brief      Retorna o dado no endereço
+ * @param[in]  index indice do dado na lista
+ */
+
+    T& operator[](std::size_t index){
+        return contents[index];
+    }
+/**
+ * @brief      Retorna o dado no endereço const
+ * @param[in]  index indice do dado na lista const
+ */
+    const T& operator[](std::size_t index) const {
+        return contents[index];
     }
 
 private:
+
     T* contents;            // Guarda um ponteiro para o inicio da lista de elementos do tipo T
     std::size_t size_;      // Guarda o final da lista
     std::size_t max_size_;  // Guarda o tamanho maximo que a lista pode suportar
