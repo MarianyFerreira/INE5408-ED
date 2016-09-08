@@ -69,15 +69,26 @@ public:
         //novo ->_proximo <- anterior ->_proximo;
 		//novo ->_info <- info;
 		//anterior ->_proximo <- novo;
-		++size_;
+		++size_;                              // tamanho = tamanho + 1;
     }  // inserir na posição
 
     void insert_sorted(const T& data) {
 
-        if(empty())
+        if (empty())
             return pop_front(data);
 
         *aux = new Node[data_];
+        int index = 1;
+
+        // ENQUANTO (atual ->_proximo ~= NULO E
+            // dado > atual ->_info)) FACA
+            // atual <- atual ->_proximo;
+            ++index;                        // posicao <- posicao +1;
+
+        if (data > aux[])
+            return insert(data, index +1);
+        
+        return insert(data, index);
 
     } // inserir em ordem
 
