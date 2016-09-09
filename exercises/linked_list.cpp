@@ -2,48 +2,64 @@
 #define STRUCTURES_LINKED_LIST_H
 
 #include <cstdint>
+#include <stdexcept> 
 
 
 namespace structures {
 
 template<typename T>
+
 class LinkedList {
 public:
-    LinkedList() {
 
-    data_ = null;
-    size_ = 0;
-    
-    } // construtor padrão
+    LinkedList() = default;
 
     ~LinkedList() {
         clear();
     } // destrutor
 
     void clear() {
+        
         Node *current, *previous;
-
-        if (empty())
-            throw std::out_of_range("Empty Linked List!");
-
-        return size_ == 0;
+        
+        // if (empty())
+        //    throw std::out_of_range("Empty Linked List!");
+        
+        current = head;
+        
+        while (current != nullptr){
+            previous = current;
+            current = current->next();
+            delete previous;
+        }
+        
+        size_ = 0;
+        head = nullptr;
+        
     } // limpar lista
 
     void push_back(const T& data) {
-
+        
+        if (empty()) {
+            push_front(data);
+            return;
+        }
+        
+        insert(data, size_);
+        
     } // inserir no fim
 
     void push_front(const T& data) {
 
-		*aux = new Node(data);
+		Node *aux = new Node(data); // PROXIMO <- _DADOS
 
-        if (aux = null)
+        if (aux == nullptr)
             throw std::out_of_range("Full Linked List!");
-
-        //novo ->_proximo <- _dados;
-		//novo ->_info <- dado;
-		//_dados <- novo;
-		++size_;        
+        
+        aux->next(head); // novo ->_proximo
+        head = aux;     // proximo <- novo
+		++size_;
+		
     } // inserir no início
 
     void insert(const T& data, std::size_t index) {
@@ -51,77 +67,96 @@ public:
    		if (index > size())
    			throw std::out_of_range("Index not found!");
 
-        if (index = 1)
+        if (index == 0)
         	return push_front(data);
 
-        *aux = new Node(data);
+        Node *aux = new Node(data); //novo ->_info <- info;
 
-        if (aux = null)
+        if (aux == nullptr)
             throw std::out_of_range("Full Linked List!");
         
-        *previous = new Node(data_);
+        Node *previous;
+        
+        previous = head;
 
-        for (int i = 0; i < index - 2; i++){
-
-        	//anterior <- anterior ->_proximo;
+        for (int i = 0; i < index -1; i++){
+            
+        	previous = previous->next(); //anterior <- anterior ->_proximo;
+            
         }
 
-        //novo ->_proximo <- anterior ->_proximo;
-		//novo ->_info <- info;
-		//anterior ->_proximo <- novo;
-		++size_;                              // tamanho = tamanho + 1;
+        aux->next(previous->next());    //novo ->_proximo <- anterior->_proximo;
+		previous->next(aux);            //anterior ->_proximo <- novo;
+		++size_;                        // tamanho = tamanho + 1;
     }  // inserir na posição
 
     void insert_sorted(const T& data) {
 
-        if (empty())
-            return pop_front(data);
-
-        *aux = new Node[data_];
-        int index = 1;
-
-        // ENQUANTO (atual ->_proximo ~= NULO E
-            // dado > atual ->_info)) FACA
-            // atual <- atual ->_proximo;
-            ++index;                        // posicao <- posicao +1;
-
-        if (data > aux[])
-            return insert(data, index +1);
+        if (empty()) {
+            push_front(data);
+            return;
+        }
         
-        return insert(data, index);
+        auto current = head; //atual <- _dados;
+        int index = 0;
+
+        while (current->next() != nullptr and data > current->data()){
+        // ENQUANTO (atual ->_proximo ~= NULO E dado > atual ->_info)) FACA
+        
+            current = current->next();           // atual <- atual ->_proximo;
+            ++index;                        // posicao <- posicao +1;
+        }
+        
+        if (data > current->data()){
+            insert(data, index +1);
+            return;
+        }
+        
+        insert(data, index);
 
     } // inserir em ordem
 
     T& at(std::size_t index) {
-
+        
+        if (empty())
+            throw std::out_of_range("Empty Linked List!");
+        if (index > size_)
+            throw std::out_of_range("Index not found!");
+        
+        auto previous = head;
+         for(int i = 0; i < index; ++i){
+             previous = previous->next();
+         }
+         
+         return previous->data();
     } // acessar um elemento na posição index
 
     T pop(std::size_t index) {
 
-        if (index > size())
+        if (index >= size())
             throw std::out_of_range("Index not found!");
 
-        if (index = 1)
-            return push_front(data);
+        if (index == 0)
+            return pop_front();
 
-        previous = new Node[data];
-        del = new Node[nullptr];
+        auto previous = head;        
 
-        for (int i = 0; i < index - 2){
-            // anterior <- anterior ->_proximo;
+        for (int i = 0; i < index -1; i++){
+             previous = previous->next(); // anterior <- anterior ->_proximo;
         }
-        // eliminar <- anterior ->_proximo;
-        // volta <- eliminar ->_info;
-        // anterior ->_proximo <- eliminar ->_proximo;
-        --size; // _tamanho <- _tamanho - 1;
-        // LIBERE(eliminar);
-        // RETORNE(volta);
-
+        
+        auto del = previous->next();    // eliminar <- anterior ->_proximo;
+        auto back = del->data();        // volta <- eliminar ->_info;
+        previous->next(del->next());   // anterior ->_proximo <- eliminar ->_proximo;
+        --size_;                        // _tamanho <- _tamanho - 1;
+        
+        delete del;                     // LIBERE(eliminar);
+        return back;                    // RETORNE(volta);
 
     } // retirar da posição
 
     T pop_back() {
-
+        return pop(size_ -1);
     } // retirar do fim
 
     T pop_front() {
@@ -129,19 +164,18 @@ public:
     	if(empty())
     		throw std::out_of_range("Empty Linked List!");
 
-    	*out = new Node[data_];       // saiu <- _dados;
-    	*back = new T out[data_];		   // volta <- saiu ->info;
-    	data_ = out[next_];		           // _dados <- saiu ->próximo;
+    	Node *out = head;                // saiu <- _dados;
+    	auto back = out->data();		 // volta <- saiu ->info;
+    	head = out->next();		         // _dados <- saiu ->próximo;
 
-    	++size_;
-
-    	// libere(saiu)
-
+    	--size_;
+        delete out;
+        
     	return back;
     } // retirar do início
 
     void remove(const T& data) {
-
+        pop(find(data));
     } // remover específico
 
     bool empty() const {
@@ -151,24 +185,32 @@ public:
     } // lista vazia
 
     bool contains(const T& data) const {
-
+        auto previous = head;
+        
+        for(int i = 0; i < size_; ++i){
+            if(previous->data() == data)
+                return true;
+            previous = previous->next();
+        }
+        return false;
     } // contém
 
     std::size_t find(const T& data) const {
-
+        
+        auto previous = head;
+        
+        for(int i = 0; i < size_; ++i){
+            if(previous->data() == data)
+                return i;
+            previous = previous->next();
+        }
+        
+            return size_;
     } // posição do dado
 
     std::size_t size() const {
-
+        return size_;
     } // tamanho da lista
-
-// Linked List tem:
-//   Node* head{nullptr};       Elemento *_dados;
-//  std::size_t size_{0u};      inteiro _tamanho;
-
-// Node tem: 
-//  T data_;                    T *_info;
-//  Node* next_{nullptr};       Elemento *_proximo;
 
 private:
     class Node { // Elemento
@@ -222,4 +264,3 @@ private:
 }
 
 #endif
-
