@@ -58,14 +58,18 @@ class FileNoAVL  {
  *  \param data posição do comando no manpage.dat.
  */
     FileNoAVL(int data, char command[100]) {
-        node.height = 1;
-        node.right = 0;
-        node.left = 0;
-        node.data = data;
-        for(int j = 0; j < 100; j++) {
+        node.height = 1;                        /*! Altura iniciada sempre com 1 */
+        node.right = 0;                         /*! Filho da direita iniciado como 0 = null */
+        node.left = 0;                          /*! Filho da esquerda iniciado como 0 = null */
+        node.data = data;                       /*! Ponteiro para o local do Nodo em disco */
+        
+        /*! Preenchimento do array com o nome do comando com ' ' pra evitar sujeiras*/
+        for(int j = 0; j < 100; j++) {          
             node.command[j] = ' ';
         }
+        /*! Preenchimento no array com o comando passado por parâmetro */
         strcpy(node.command, command);
+        /*! Abertura do arquivo onde guardamos a estrutura da arvore em modo de update e leitura*/
         indexDat = fopen("index.dat", "r+");   
     }
 
@@ -164,11 +168,12 @@ class FileNoAVL  {
 
         Node nodeTmpRight, nodeTmpLeft;
 
+        // Se a altura do pai a esquerda for diferente de 0 então lemos as informações do pai e guardamos
         if(nodeTmp.left != 0){
             fseek(indexDat, nodeTmp.left, SEEK_SET);
             fread(&nodeTmpLeft, sizeof(Node), 1, indexDat);
         }
-
+        // Se a altura do pai a direita for diferente de 0 então lemos as informações do pai e guardamos
         if(nodeTmp.right != 0){
             fseek(indexDat, nodeTmp.right, SEEK_SET);
             fread(&nodeTmpRight, sizeof(Node), 1, indexDat);
@@ -215,33 +220,43 @@ class FileNoAVL  {
 /*!  
  *   \param node nó a ser buscado na árvore.
  *   \return um ponteiro para o dado.
- *   \sa FileNoAVL(int data, char command[100])
  */
     int search(Node node) {
         Node temp;
         int root;
+        // Posicionamento do cabeçote no inicio do arquivo IndexDat
         fseek(indexDat, 0, SEEK_SET);
+        // Atribui a raiz o nodo de raiz absoluta da árvore
         fread(&root, sizeof(int), 1, indexDat);
-
+        // Posicionamento do cabeçote no nodo raiz da árvore
         fseek(indexDat, root, SEEK_SET);
+        // Lê o Nodo corespondente a raiz guardada e gurda o nodo no temp
         fread(&temp, sizeof(Node), 1, indexDat);
 
-
+        // Enquanto a raiz for diferente de 0 e o nodo pesquisado for diferente do temporário
         while (root != 0 && !(node == temp)) {
+            // Se o nodo procurado for menor que o temp
             if (node < temp) {
+                // Posiciona o cabeçote no filho da esqueda
                 fseek(indexDat, temp.left, SEEK_SET);
+                // Atualiza a raiz
                 root = temp.left;
+                // Lê o Nodo corespondente a raiz guardada e gurda o nodo no temp
                 fread(&temp, sizeof(Node), 1, indexDat);
             } else {
+                // Posiciona o cabeçote no filho da direita
                 fseek(indexDat, temp.right, SEEK_SET);
+                // Atualiza a raiz
                 root = temp.right;
+                // Lê o Nodo corespondente a raiz guardada e gurda o nodo no temp
                 fread(&temp, sizeof(Node), 1, indexDat);
             }
         }
-
+        // Retorno caso o Nodo procurado não exista na Árvore
         if (root == 0) {
             return -1;
         } else {
+        // Retorno do ponteiro para onde as informações do Nodo estão salvas (Arquivo ManPages.dat)
             return temp.data;
         }
     }
@@ -262,14 +277,13 @@ class FileNoAVL  {
             return nodeTmp.height;
         }
     }
-
 /*
-                y      (Rotação a esquerda)      x
-               / \        Right Rotation        / \
-              x   T3   – – – – – – – >        T1   y
-             / \       < - - - - - - -            / \
-            T1  T2     Left Rotation            T2  T3
-                        (Rotação a direita)
+                y        Right Rotation           x
+               / \    (Rotação a direita)        / \
+              x   T3    – – – – – – – >        T1   y
+             / \        < - - - - - - -            / \
+            T1  T2         Left Rotation        T2  T3
+                        (Rotação a esquerda)
 */
 //!  Função rightRotation, realiza uma rotação simples para direita.
 /*!  
