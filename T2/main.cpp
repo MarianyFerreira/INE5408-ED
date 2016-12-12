@@ -149,6 +149,7 @@ int main (int argc, char* argv[]) {
 		printf("------------------------>> Escolha a Opção: << ------------------------\n");
 		printf("[1] - Gerar ManPage.dat\n");
 		printf("[2] - Buscar conteudo por nome do comando\n");
+		printf("[3] - Remover arquivos ManPage.dat e Index.dat\n");
 		printf("\n");
 		printf("[0] - Para sair\n");
 		printf("\n");
@@ -162,6 +163,11 @@ int main (int argc, char* argv[]) {
 				break;
 			case 2:
 				searchByCommand();
+				break;
+			case 3:
+				remove("manpage.dat");
+				remove("index.dat");
+				printf("Arquivos removidos com sucesso!\n");
 				break;
 			default: printf("Opção inválida\n");
 		}

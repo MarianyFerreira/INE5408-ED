@@ -315,7 +315,7 @@ class FileNoAVL  {
         // Reescreve as informações do nodo Y
         fwrite(&y, sizeof(Node), 1, indexDat);
         
-        //  Atualiza altura de
+        //  Atualiza as alturas
         y.height = std::max(heightAVL(y.left), heightAVL(y.right))+1;
         // Posiciona o cabeçote na raiz
         fseek(indexDat, root, SEEK_SET);
