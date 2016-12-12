@@ -208,8 +208,7 @@ class FileNoAVL  {
     }
 
 //!  Função getData, informa o ponteiro para o dado do nó.
-/*!  
- *   \return um ponteiro que informa a posição do dado no arquivo.
+/*   \return um ponteiro que informa a posição do dado no arquivo.
  *   \sa FileNoAVL(int data, char command[100])
  */
     int getData() {
@@ -217,8 +216,7 @@ class FileNoAVL  {
     }
 
 //!  Função search, busca por um dado em uma árvore AVL.
-/*!  
- *   \param node nó a ser buscado na árvore.
+/*   \param node nó a ser buscado na árvore.
  *   \return um ponteiro para o dado.
  */
     int search(Node node) {
@@ -262,18 +260,19 @@ class FileNoAVL  {
     }
 
 //!  Função heightAVL, informa altura de um nó.
-/*!  
- *   \param node posição do nó no arquivo
+/*   \param node posição do nó no arquivo
  *   \return o valo da altura do nó.
- *   \sa FileNoAVL(int data, char command[100])
  */
     int heightAVL(int node) {
         if (node == 0) {
             return 0;
         } else {
+            // Posiciona o cabeçote no arquivo que guarda a arvore, na posicao node, passada por parametro
             fseek(indexDat, node, SEEK_SET);
+            // Guarda em nodeTmp as informações do nodo que estão no arquivo da árvore
             Node nodeTmp;
             fread(&nodeTmp, sizeof(Node), 1, indexDat);
+            // Retorna a altura do nodo
             return nodeTmp.height;
         }
     }
@@ -286,36 +285,47 @@ class FileNoAVL  {
                         (Rotação a esquerda)
 */
 //!  Função rightRotation, realiza uma rotação simples para direita.
-/*!  
- *   \param y o nó raiz da rotação.
+/*   \param y o nó raiz da rotação.
  *   \param root a posição do nó no arquivo.
  *   \return um ponteiro para o nó raiz ao final da rotação.
- *   \sa FileNoAVL(int data, char command[100])
  */
     int rightRotation(Node y, int root) {
         Node x; 
-
+        // Posiciona o cabeçote na posicao correspondente ao filho da esquerda de y
         fseek(indexDat, y.left, SEEK_SET);
+        // Lê e guarda as informações em x
         fread(&x, sizeof(Node), 1, indexDat);
 
+        // A nova raiz guarda o ponteiro da esquerda de y
         int rootNew = y.left;
+        // A auxiliar guada o ponteiro da direita de x
         int aux = x.right;
 
+        // O ponteiro a direita de x passa a ser a raiz
         x.right = root;
+        // Posiciona o cabeçote na posicao correspondente ao filho da esquerda de y
         fseek(indexDat, y.left, SEEK_SET);
+        // Reescreve as informações do nodo X
         fwrite(&x, sizeof(Node), 1, indexDat);
 
+        // O ponteiro a esquerda de y passa a ser o auxiliar
         y.left = aux;
+        // Posiciona o cabeçote na raiz 
         fseek(indexDat, root, SEEK_SET);
+        // Reescreve as informações do nodo Y
         fwrite(&y, sizeof(Node), 1, indexDat);
         
-        //  Atualiza altura
+        //  Atualiza altura de
         y.height = std::max(heightAVL(y.left), heightAVL(y.right))+1;
+        // Posiciona o cabeçote na raiz
         fseek(indexDat, root, SEEK_SET);
+        // Reescreve as informações de Y
         fwrite(&y, sizeof(Node), 1, indexDat);
 
         x.height = std::max(heightAVL(x.left), heightAVL(x.right))+1;
+        // Posiciona o cabeçote na nova raiz
         fseek(indexDat, rootNew, SEEK_SET);
+        // Reescreve as informações de X
         fwrite(&x, sizeof(Node), 1, indexDat);
 
         // Retorna nova raiz
@@ -323,11 +333,9 @@ class FileNoAVL  {
     }
 
 //!  Função leftRotation, realiza uma rotação simples para esquerda.
-/*!  
- *   \param x o nó raiz da rotação.
+/*   \param x o nó raiz da rotação.
  *   \param root a posição do nó no arquivo.
  *   \return um ponteiro para o nó raiz ao final da rotação.
- *   \sa FileNoAVL(int data, char command[100])
  */
     int leftRotation(Node x, int root) {
         Node y; 
@@ -360,8 +368,7 @@ class FileNoAVL  {
     }
 
 //!  Função getBalance, calcula a diferença das alturas dos nós filhos.
-/*!  
- *   \param nodo o nó pai.
+/*   \param nodo o nó pai.
  *   \return um inteiro que informa a diferença das alturas dos nós filhos.
  *   \sa FileNoAVL(int data, char command[100])
  */

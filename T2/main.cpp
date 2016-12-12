@@ -6,16 +6,16 @@
 #include <ctype.h>
 #include "FileNoAVL.hpp"
 
-static const int commandSize = 100;
-static const int contentSize = 139900;
+static const int commandSize = 100;		/*! Tamanho máximo do nome de um comando*/
+static const int contentSize = 139900;	/*! Tamanho máximo da explicação de um comando*/
 
 //!  Struct do elemento comando com manpage.
 /*!  Struct que possui o nome do comando e
  *   conteúdo da manpage do comando.
  */
 typedef struct ManPage {
-	char command[commandSize];
-	char content[contentSize];
+	char command[commandSize];		/*! Inicialização dos arrays de char com o tamanho maximo possivel para o nome de um comando */
+	char content[contentSize];		/*! Inicialização dos arrays de char com o tamanho maximo possivel para a descrição de um comando */
 } ManPage;
 
 //! Função createDatFiles.
@@ -102,31 +102,46 @@ void createDatFiles(int argc, char *argv[]) {
 /*! Realiza a busca da manpage de um comando, pela sua chave primária.
  */
 void searchByCommand(){
+	// Pergunta para o usuário o comando a ser pesquisado
 	printf("\nInforme o nome do comando a ser procurado:\n");
+	// Guarda em command o caminho da pasta
 	char command[100] = "ManPages/";
+	// Preenche o restante do array com ' ' pra evitar sujeiras
 	for(int i=9; i<commandSize; i++) {
 		 command[i] = ' ';
 	}
+	// Esqueve após ManPages/ o nome do arquivo a ser procurado
 	scanf("%s", &command[9]);
 
+	// Cria um Nodo para utilizar na pesquisa
 	FileNoAVL *avlNode = new FileNoAVL(0, command);
+	// Chama a função search da arvore AVL e guarda o retorno na variavel commandAdress
 	int commandAddress = avlNode->search(avlNode->getNode());
+	// Se o retorno da função search for -1 o comando não existe na Árvore
 	if (commandAddress == -1) {
 		printf("Comando inexistente\n");
 		return;
 	}
+	// Se o comando existir é necessário abrir o ManPages.dat e posicionar o cabeçote no
+	// endereço retornado pela função search e depois printá-lo na Tela.
 	ManPage manPage;
 	FILE* manPageDat = fopen("manpage.dat", "r");
+	
+	// Posicionamento do cabeçote na posição de retorno do search, onde está as informações da Manpage
 	fseek(manPageDat, commandAddress, SEEK_SET);
+	// Leitura e armazenamento das informações da ManPage encontrada
 	fread(&manPage, sizeof(ManPage), 1, manPageDat);
+	// Print das informações
 	printf("COMANDO: %s\n", manPage.command);
 	printf("CONTEÚDO: %s\n", manPage.content);
+	// Deleção do nodo de pesquisa
 	delete avlNode;
+	// Fechamento do arquivo ManPages.dat
 	fclose(manPageDat);
 }
 
 int main (int argc, char* argv[]) {
-	// INICIA O MENU DO PROGRAMA
+	// MENU DO PROGRAMA
 	int input;
 	system("clear");
 	do{
